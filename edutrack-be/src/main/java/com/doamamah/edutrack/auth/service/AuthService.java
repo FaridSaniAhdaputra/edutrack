@@ -1,8 +1,13 @@
 package com.doamamah.edutrack.auth.service;
 
+import com.doamamah.edutrack.auth.model.Student;
+import com.doamamah.edutrack.auth.model.Teacher;
 import com.doamamah.edutrack.auth.model.User;
 import com.doamamah.edutrack.auth.repository.UserRepository;
 import org.springframework.stereotype.Service;
+
+import java.util.Map;
+import java.util.Optional;
 
 import java.util.Optional;
 
@@ -42,5 +47,35 @@ public class AuthService {
         }
 
         return user;
+    }
+
+    /**
+     * Mendaftarkan pengguna baru (Siswa atau Pengajar).
+     *
+     * @param userData data dari request JSON
+     * @return User yang berhasil didaftarkan
+     * @throws RuntimeException jika username sudah digunakan
+     */
+    public User register(Map<String, String> userData) {
+        String username = userData.get("username");
+        String password = userData.get("password");
+        String fullName = userData.get("fullName");
+        String email = userData.get("email");
+        String role = userData.get("role");
+
+        if (userRepository.findByUsername(username).isPresent()) {
+            throw new RuntimeException("Username '" + username + "' sudah digunakan.");
+        }
+
+        User newUser;
+        if ("Pengajar".equalsIgnoreCase(role) || "TEACHER".equalsIgnoreCase(role)) {
+            String teacherId = "TCH" + System.currentTimeMillis();
+            newUser = new Teacher(username, password, fullName, email, teacherId, "Umum", 0);
+        } else {
+            String studentId = "STD" + System.currentTimeMillis();
+            newUser = new Student(username, password, fullName, email, studentId, 0);
+        }
+
+        return userRepository.save(newUser);
     }
 }

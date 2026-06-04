@@ -142,4 +142,46 @@ public class AuthService {
             System.err.println("Logout request gagal: " + e.getMessage());
         }
     }
+
+    /**
+     * Mengirim POST request ke /api/auth/register dengan data registrasi.
+     *
+     * @param username nama pengguna
+     * @param password kata sandi
+     * @param fullName nama lengkap
+     * @param email email
+     * @param role peran (Siswa / Pengajar)
+     * @throws Exception jika registrasi gagal
+     */
+    public void register(String username, String password, String fullName, String email, String role) throws Exception {
+        JsonObject requestBody = new JsonObject();
+        requestBody.addProperty("username", username);
+        requestBody.addProperty("password", password);
+        requestBody.addProperty("fullName", fullName);
+        requestBody.addProperty("email", email);
+        requestBody.addProperty("role", role);
+
+        String requestJson = gson.toJson(requestBody);
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(BASE_URL + "/api/auth/register"))
+                .header("Content-Type", "application/json")
+                .header("Accept", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(requestJson))
+                .timeout(Duration.ofSeconds(15))
+                .build();
+
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        int statusCode = response.statusCode();
+
+        if (statusCode == 201) {
+            return; // Sukses
+        } else if (statusCode == 400 || statusCode == 409) {
+            JsonObject jsonResponse = gson.fromJson(response.body(), JsonObject.class);
+            String errorMsg = jsonResponse.has("error") ? jsonResponse.get("error").getAsString() : "Registrasi gagal.";
+            throw new Exception(errorMsg);
+        } else {
+            throw new Exception("Registrasi gagal. Server merespons dengan kode: " + statusCode);
+        }
+    }
 }

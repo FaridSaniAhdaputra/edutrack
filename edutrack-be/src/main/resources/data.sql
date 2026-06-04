@@ -1,19 +1,19 @@
 -- =====================================================================
 -- EduTrack - Data Awal (Seed Data)
 -- File ini dieksekusi otomatis oleh Spring Boot saat aplikasi pertama kali dijalankan.
--- Menggunakan MERGE INTO agar data tidak duplikat jika aplikasi di-restart.
 -- =====================================================================
 
 -- ===== SEED USERS =====
 -- Password: 123 (plain text, sesuai kebutuhan tugas)
+-- Kolom dipisah per-role agar tidak bentrok dengan H2 check constraint
 
-MERGE INTO users (id, role, username, password, full_name, email, student_id, enrolled_courses, teacher_id, specialization, total_courses)
+MERGE INTO users (id, role, username, password, full_name, email, student_id, enrolled_courses)
 KEY(username) VALUES
-(1, 'STUDENT', 'siswa', '123', 'Budi Santoso', 'budi@demo.com', 'STD001', 4, NULL, NULL, 0);
+(1, 'STUDENT', 'siswa', '123', 'Budi Santoso', 'budi@demo.com', 'STD001', 4);
 
-MERGE INTO users (id, role, username, password, full_name, email, student_id, enrolled_courses, teacher_id, specialization, total_courses)
+MERGE INTO users (id, role, username, password, full_name, email, teacher_id, specialization, total_courses)
 KEY(username) VALUES
-(2, 'TEACHER', 'guru', '123', 'Ibu Sari Dewi', 'sari@demo.com', NULL, 0, 'TCH001', 'Pemrograman Java', 4);
+(2, 'TEACHER', 'guru', '123', 'Ibu Sari Dewi', 'sari@demo.com', 'TCH001', 'Pemrograman Java', 4);
 
 -- ===== SEED COURSE MATERIALS =====
 

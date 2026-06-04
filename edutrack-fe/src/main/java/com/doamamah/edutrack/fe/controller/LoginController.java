@@ -57,7 +57,7 @@ public class LoginController implements Initializable {
         usernameField.setOnAction(e -> passwordField.requestFocus());
         
         if (regRoleCombo != null) {
-            regRoleCombo.getItems().addAll("Siswa");
+            regRoleCombo.getItems().addAll("Siswa", "Pengajar");
             regRoleCombo.setValue("Siswa");
         }
         hideError();
@@ -182,12 +182,30 @@ public class LoginController implements Initializable {
             return;
         }
 
-        showSuccessAlert(
-            "Pendaftaran Berhasil",
-            "Selamat bergabung di EduTrack!",
-            "Akun dengan username '" + username + "' sebagai " + role + " berhasil didaftarkan.\nSilakan masuk untuk mulai belajar!"
-        );
-        showLogin();
+        setLoadingState(true);
+        hideError();
+
+        Thread registerThread = new Thread(() -> {
+            try {
+                authService.register(username, password, fullName, email, role);
+                Platform.runLater(() -> {
+                    setLoadingState(false);
+                    showSuccessAlert(
+                        "Pendaftaran Berhasil",
+                        "Selamat bergabung di EduTrack!",
+                        "Akun dengan username '" + username + "' sebagai " + role + " berhasil didaftarkan.\nSilakan masuk untuk mulai belajar!"
+                    );
+                    showLogin();
+                });
+            } catch (Exception e) {
+                Platform.runLater(() -> {
+                    setLoadingState(false);
+                    showError(e.getMessage());
+                });
+            }
+        });
+        registerThread.setDaemon(true);
+        registerThread.start();
     }
 
     @FXML

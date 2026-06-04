@@ -70,6 +70,35 @@ public class AuthController {
     }
 
     /**
+     * POST /api/auth/register
+     * Body: { "username": "...", "password": "...", "fullName": "...", "email": "...", "role": "..." }
+     * Response 201: Jika berhasil mendaftar.
+     * Response 400: Jika input tidak lengkap.
+     * Response 409: Jika username sudah ada.
+     */
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@RequestBody Map<String, String> request) {
+        String username = request.get("username");
+        String password = request.get("password");
+        String fullName = request.get("fullName");
+        
+        if (username == null || username.isBlank() || password == null || password.isBlank() || fullName == null || fullName.isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Username, password, dan nama lengkap wajib diisi."));
+        }
+        
+        try {
+            User newUser = authService.register(request);
+            return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
+                "message", "Registrasi berhasil",
+                "username", newUser.getUsername(),
+                "role", newUser.getRole()
+            ));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    /**
      * POST /api/auth/logout
      * Endpoint sederhana — mengembalikan 200 OK.
      */
